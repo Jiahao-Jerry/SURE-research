@@ -1,0 +1,27 @@
+{
+  "ctfidf_model": {
+    "bm25_weighting": false,
+    "reduce_frequent_words": false
+  },
+  "vectorizer_model": {
+    "params": {
+      "analyzer": "word",
+      "binary": false,
+      "decode_error": "strict",
+      "encoding": "utf-8",
+      "input": "content",
+      "lowercase": true,
+      "max_df": 0.9,
+      "max_features": 200000,
+      "min_df": 50,
+      "ngram_range": [
+        1,
+        2
+      ],
+      "stop_words": "english",
+      "strip_accents": null,
+      "token_pattern": "(?u)\\b\\w\\w+\\b",
+      "vocabulary": null
+    },
+    "vocab": {
+      "literally": 

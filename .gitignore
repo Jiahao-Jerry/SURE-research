@@ -1,0 +1,38 @@
+# Large data files
+candidate_posts_eng10.jsonl
+candidate_posts_eng10.jsonl.gz
+post_topics_gpu.jsonl
+post_topics.jsonl
+embeddings.npy
+post_ids.npy
+*.DS_Store
+
+# Intermediate/preview files
+30_preview_posts.jsonl
+400_preview_posts.jsonl
+500_posts_post_train.jsonl
+1700_posts_final.jsonl
+label_300_zh.csv
+label_300.csv
+labeler.html
+load_filtered_labeler.py
+load_final_labeler.py
+load_sample_labeler.py
+sample_preview.py
+preview_new2.py
+make_comparison_labeler.py
+comparison_labeler.html
+sports_comparison_100.csv
+climate_comparison_100.csv
+progress_40.csv
+step1_colab.py
+step2_local.py
+step3_train_score.py
+topic_info.csv
+topic_info_gpu.csv
+topic_batches/
+bertopic_model_pickle
+labeled_300.csv
+
+# Misc
+*.csv.gz
