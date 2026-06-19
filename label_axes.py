@@ -1,0 +1,132 @@
+"""
+Label 2,550 posts with 7 style axes using Claude Haiku.
+
+Input:  2550_posts.jsonl
+Output: 2550_posts.jsonl  (adds axes_json field in-place)
+        label_axes_checkpoint.json  (resume support)
+"""
+
+import json, os, time
+from anthropic import Anthropic
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+INPUT_FILE      = "2550_posts.jsonl"
+CHECKPOINT_FILE = "label_axes_checkpoint.json"
+BATCH_SIZE      = 5
+MAX_WORKERS     = 20
+
+client = Anthropic()
+
+SYSTEM_PROMPT = """You are a writing style analyst. For each numbered post, score 7 style dimensions and return ONLY a JSON array.
+
+Each element in the array must be an object with exactly these keys:
+{
+  "reading_level":     {"score": 0.0-1.0},
+  "background":        {"score": 0.0-1.0},
+  "abstract_concrete": {"score": 0.0-1.0},
+  "tone":              {"score": 0.0-1.0},
+  "humor":             {"score": 0.0-1.0, "subtype": string_or_null},
+  "narrativity":       {"score": 0.0-1.0, "subtype": string_or_null},
+  "grounding":         {"score": 0.0-1.0, "domain": string_or_null}
+}
+
+Dimension guidelines:
+- reading_level: 0=simple vocabulary/short sentences, 1=academic/complex
+- background: 0=assumes no prior knowledge, 1=assumes expert knowledge
+- abstract_concrete: 0=vague/general claims, 1=specific facts/examples/numbers
+- tone: 0=analytical/neutral, 1=emotional/charged
+- humor score: 0=earnest, 1=very humorous. subtype: "witty","sarcastic","dry","deadpan","self-deprecating","playful","wry","satirical","absurdist","dark","hyperbolic","light","dismissive" or null
+- narrativity score: 0=pure argument/facts, 1=story/anecdote. subtype: "personal anecdote","news narrative","historical","observational scene" or null
+- grounding domain: domain of the concrete reference: "scientific","historical","personal","news event","sports","pop culture","hypothetical" or null
+
+Reply ONLY with a valid JSON array of objects, one per post."""
+
+
+def score_batch(batch, attempt=1):
+    numbered = "\n\n".join(f"[{i+1}] {p['text'][:500]}" for i, p in enumerate(batch))
+    try:
+        resp = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=1500,
+            temperature=0,
+            system=SYSTEM_PROMPT,
+            messages=[{"role": "user", "content":
+                f"Score these {len(batch)} posts:\n\n{numbered}"}]
+        )
+        raw = resp.content[0].text.strip()
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+        scores = json.loads(raw.strip())
+        if len(scores) == len(batch):
+            return scores
+    except Exception as e:
+        if attempt < 3:
+            time.sleep(2 ** attempt)
+            return score_batch(batch, attempt + 1)
+        print(f"  Batch failed: {e}")
+    return [None] * len(batch)
+
+
+def load_checkpoint():
+    if os.path.exists(CHECKPOINT_FILE):
+        with open(CHECKPOINT_FILE) as f:
+            return json.load(f)
+    return {}
+
+
+def save_checkpoint(cp):
+    with open(CHECKPOINT_FILE, "w") as f:
+        json.dump(cp, f)
+
+
+def main():
+    posts = []
+    with open(INPUT_FILE) as f:
+        for line in f:
+            posts.append(json.loads(line))
+    print(f"Loaded {len(posts)} posts")
+
+    checkpoint = load_checkpoint()
+    print(f"Checkpoint: {len(checkpoint)} already labeled")
+
+    todo = [p for p in posts if str(p["post_id"]) not in checkpoint]
+    print(f"Remaining: {len(todo)} posts")
+
+    batches = [todo[i:i+BATCH_SIZE] for i in range(0, len(todo), BATCH_SIZE)]
+    processed = 0
+
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        futures = {executor.submit(score_batch, b): b for b in batches}
+        for future in as_completed(futures):
+            batch = futures[future]
+            scores = future.result()
+            for post, axes in zip(batch, scores):
+                if axes is not None:
+                    checkpoint[str(post["post_id"])] = axes
+            processed += len(batch)
+            if processed % 50 == 0 or processed == len(batches):
+                save_checkpoint(checkpoint)
+                done = len([p for p in posts if str(p["post_id"]) in checkpoint])
+                print(f"  [{done}/{len(posts)}] labeled")
+
+    save_checkpoint(checkpoint)
+    print(f"\nLabeling done. Writing output...")
+
+    # Merge axes back into posts
+    missing = 0
+    with open(INPUT_FILE, "w") as f:
+        for p in posts:
+            axes = checkpoint.get(str(p["post_id"]))
+            if axes is None:
+                missing += 1
+            p["axes_json"] = axes
+            f.write(json.dumps(p, ensure_ascii=False) + "\n")
+
+    print(f"Done. {len(posts) - missing} posts labeled, {missing} missing.")
+    print(f"Output: {INPUT_FILE}")
+
+
+if __name__ == "__main__":
+    main()

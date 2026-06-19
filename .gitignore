@@ -1,4 +1,4 @@
-# Large data files
+# Large raw files (not tracked)
 candidate_posts_eng10.jsonl
 candidate_posts_eng10.jsonl.gz
 post_topics_gpu.jsonl
@@ -7,7 +7,7 @@ embeddings.npy
 post_ids.npy
 *.DS_Store
 
-# Intermediate/preview files
+# Intermediate / old files
 30_preview_posts.jsonl
 400_preview_posts.jsonl
 500_posts_post_train.jsonl
@@ -15,6 +15,8 @@ post_ids.npy
 label_300_zh.csv
 label_300.csv
 labeler.html
+labeler_68.html
+labeler_v2_preview.html
 load_filtered_labeler.py
 load_final_labeler.py
 load_sample_labeler.py
@@ -25,8 +27,6 @@ comparison_labeler.html
 sports_comparison_100.csv
 climate_comparison_100.csv
 progress_40.csv
-step1_colab.py
-step2_local.py
 step3_train_score.py
 topic_info.csv
 topic_info_gpu.csv
