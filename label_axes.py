@@ -9,6 +9,7 @@ Output: 2550_posts.jsonl  (adds axes_json field in-place)
 import json, os, time
 from anthropic import Anthropic
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from config import load_config, build_label_prompt, validate_config
 
 INPUT_FILE      = "2550_posts.jsonl"
 CHECKPOINT_FILE = "label_axes_checkpoint.json"
@@ -17,29 +18,9 @@ MAX_WORKERS     = 20
 
 client = Anthropic()
 
-SYSTEM_PROMPT = """You are a writing style analyst. For each numbered post, score 7 style dimensions and return ONLY a JSON array.
-
-Each element in the array must be an object with exactly these keys:
-{
-  "reading_level":     {"score": 0.0-1.0},
-  "background":        {"score": 0.0-1.0},
-  "abstract_concrete": {"score": 0.0-1.0},
-  "tone":              {"score": 0.0-1.0},
-  "humor":             {"score": 0.0-1.0, "subtype": string_or_null},
-  "narrativity":       {"score": 0.0-1.0, "subtype": string_or_null},
-  "grounding":         {"score": 0.0-1.0, "domain": string_or_null}
-}
-
-Dimension guidelines:
-- reading_level: 0=simple vocabulary/short sentences, 1=academic/complex
-- background: 0=assumes no prior knowledge, 1=assumes expert knowledge
-- abstract_concrete: 0=vague/general claims, 1=specific facts/examples/numbers
-- tone: 0=analytical/neutral, 1=emotional/charged
-- humor score: 0=earnest, 1=very humorous. subtype: "witty","sarcastic","dry","deadpan","self-deprecating","playful","wry","satirical","absurdist","dark","hyperbolic","light","dismissive" or null
-- narrativity score: 0=pure argument/facts, 1=story/anecdote. subtype: "personal anecdote","news narrative","historical","observational scene" or null
-- grounding domain: domain of the concrete reference: "scientific","historical","personal","news event","sports","pop culture","hypothetical" or null
-
-Reply ONLY with a valid JSON array of objects, one per post."""
+cfg = load_config()
+validate_config(cfg)
+SYSTEM_PROMPT = build_label_prompt(cfg)
 
 
 def score_batch(batch, attempt=1):

@@ -1,0 +1,85 @@
+topics:
+  - cluster_id: 0
+    name: "Pets"
+  - cluster_id: 10
+    name: "Music"
+  - cluster_id: 11
+    name: "Books & Reading"
+  - cluster_id: 12
+    name: "Climate & Energy"
+  - cluster_id: 15
+    name: "Sports"
+  - cluster_id: 20
+    name: "Birds & Nature"
+  - cluster_id: 23
+    name: "Food & Cooking"
+  - cluster_id: 33
+    name: "Gardening & Plants"
+  - cluster_id: 39
+    name: "Movies & Film"
+  - cluster_id: 48
+    name: "Video Games"
+  - cluster_id: 49
+    name: "Space & Astronomy"
+  - cluster_id: 51
+    name: "Ancient History"
+  - cluster_id: 52
+    name: "Fitness & Gym"
+  - cluster_id: 63
+    name: "Politics"
+  - cluster_id: 78
+    name: "Higher Education"
+  - cluster_id: 83
+    name: "Economy & Jobs"
+  - cluster_id: 106
+    name: "Capitalism"
+
+axes:
+  - name: "reading_level"
+    short: "read_lvl"
+    color: "#6c8ebf"
+    label_description: "0=simple vocabulary/short sentences, 1=academic/complex"
+    rewrite_up: "more specialist vocabulary and complex sentence structure"
+    rewrite_down: "simpler vocabulary and shorter sentences, as if explaining to a general audience"
+
+  - name: "background"
+    short: "backgrnd"
+    color: "#82b366"
+    label_description: "0=assumes no prior knowledge, 1=assumes expert knowledge"
+    rewrite_up: "assume more prior knowledge — skip context and get straight to the point"
+    rewrite_down: "unpack more background context so a newcomer can follow along"
+
+  - name: "abstract_concrete"
+    short: "abst_conc"
+    color: "#d6b656"
+    label_description: "0=vague/general claims, 1=specific facts/examples/numbers"
+    rewrite_up: "more concrete — replace vague claims with specific named facts, events, or people"
+    rewrite_down: "more abstract — remove specific examples and speak in general terms"
+
+  - name: "tone"
+    short: "tone"
+    color: "#ae4132"
+    label_description: "0=analytical/neutral, 1=emotional/charged"
+    rewrite_up: "more emotionally charged and urgent"
+    rewrite_down: "more measured and analytical — cool the emotional temperature down"
+
+  - name: "humor"
+    short: "humor"
+    color: "#9673a6"
+    label_description: "0=earnest, 1=very humorous"
+    rewrite_up: "wittier and more playful — add dry humor or sarcasm"
+    rewrite_down: "more earnest and serious — remove any wit or comedy"
+
+  - name: "narrativity"
+    short: "narrat"
+    color: "#d79b00"
+    label_description: "0=pure argument/facts, 1=story/anecdote"
+    rewrite_up: "more story-like — add a brief personal anecdote or scene-setting opener"
+    rewrite_down: "pure assertion style — remove personal framing, just make the argument directly"
+
+  - name: "grounding"
+    short: "ground"
+    color: "#23748a"
+    label_description: "0=direct statement, 1=analogy/example-driven"
+    rewrite_up: "more example-driven — add a concrete analogy or real-world comparison"
+    rewrite_down: "more general — remove analogies and examples, state the point directly"

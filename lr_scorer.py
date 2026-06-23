@@ -19,30 +19,69 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report
 from collections import defaultdict
+import os
+from config import load_config, get_cluster_to_topic, validate_config
 
 t0 = time.time()
 
-# ── BERTopic cluster ID → topic name (derived from 2550_posts_final.jsonl) ──
-CLUSTER_TO_TOPIC = {
-     0:  "Pets",
-    10:  "Music",
-    11:  "Books & Reading",
-    12:  "Climate & Energy",
-    15:  "Sports",
-    20:  "Birds & Nature",
-    23:  "Food & Cooking",
-    33:  "Gardening & Plants",
-    39:  "Movies & Film",
-    48:  "Video Games",
-    49:  "Space & Astronomy",
-    51:  "Ancient History",
-    52:  "Fitness & Gym",
-    63:  "Politics",
-    78:  "Higher Education",
-    83:  "Economy & Jobs",
-   106:  "Capitalism",
-}
+TOP_N_PER_TOPIC = 1000
+
+cfg = load_config()
+validate_config(cfg)
+CLUSTER_TO_TOPIC = get_cluster_to_topic(cfg)
 SELECTED_CLUSTERS = set(CLUSTER_TO_TOPIC.keys())
+
+# ── Fast path: rebuild candidate pool from existing scores ────────
+if os.path.exists("probability_scores.jsonl"):
+    print("probability_scores.jsonl found — skipping LR training/scoring.")
+    print("Loading existing scores...")
+    scores     = {}
+    post_topic = {}
+    with open("probability_scores.jsonl") as f:
+        for line in f:
+            d = json.loads(line)
+            pid = str(d["post_id"])
+            scores[pid]     = d["probability_score"]
+            post_topic[pid] = d["cluster_id"]
+    print(f"  Loaded {len(scores):,} scores")
+
+    print("Loading post texts...")
+    eligible_pids = set(scores.keys())
+    post_data = {}
+    with open("candidate_posts_eng10.jsonl") as f:
+        for line in f:
+            d   = json.loads(line)
+            pid = str(d["post_id"])
+            if pid in eligible_pids:
+                post_data[pid] = d
+    print(f"  Loaded {len(post_data):,} post texts")
+
+    print(f"\nBuilding candidate_pool_{TOP_N_PER_TOPIC}.jsonl (top {TOP_N_PER_TOPIC} per topic)...")
+    by_topic = defaultdict(list)
+    for pid, score in scores.items():
+        topic_name = CLUSTER_TO_TOPIC[post_topic[pid]]
+        by_topic[topic_name].append((pid, score))
+
+    total = 0
+    with open(f"candidate_pool_{TOP_N_PER_TOPIC}.jsonl", "w") as f:
+        for topic_name, pid_scores in sorted(by_topic.items()):
+            topN = sorted(pid_scores, key=lambda x: x[1], reverse=True)[:TOP_N_PER_TOPIC]
+            for pid, score in topN:
+                d = post_data.get(pid, {})
+                f.write(json.dumps({
+                    "post_id":    pid,
+                    "topic_name": topic_name,
+                    "cluster_id": post_topic[pid],
+                    "text":       d.get("text", ""),
+                    "engagement": d.get("engagement", 0),
+                    "lr_score":   round(score, 4),
+                }, ensure_ascii=False) + "\n")
+            total += len(topN)
+            print(f"  {topic_name:<30} {len(topN)} posts")
+
+    print(f"\nTotal: {total} posts → candidate_pool_{TOP_N_PER_TOPIC}.jsonl")
+    print(f"Done in {(time.time() - t0) / 60:.1f} minutes")
+    exit()
 
 # ── Step 1: Load labels ───────────────────────────────────────────
 print("Loading labels...")
@@ -142,18 +181,18 @@ with open("probability_scores.jsonl", "w") as f:
         }) + "\n")
 print(f"  Saved {len(scores):,} scores")
 
-# ── Step 9: Top 500 per topic → candidate_pool_500.jsonl ──────────
-print("\nBuilding candidate_pool_500.jsonl (top 500 per topic)...")
+# ── Step 9: Top N per topic → candidate_pool_N.jsonl ──────────────
+print(f"\nBuilding candidate_pool_{TOP_N_PER_TOPIC}.jsonl (top {TOP_N_PER_TOPIC} per topic)...")
 by_topic = defaultdict(list)
 for pid, score in scores.items():
     topic_name = CLUSTER_TO_TOPIC[post_topic[pid]]
     by_topic[topic_name].append((pid, score))
 
 total = 0
-with open("candidate_pool_500.jsonl", "w") as f:
+with open(f"candidate_pool_{TOP_N_PER_TOPIC}.jsonl", "w") as f:
     for topic_name, pid_scores in sorted(by_topic.items()):
-        top500 = sorted(pid_scores, key=lambda x: x[1], reverse=True)[:500]
-        for pid, score in top500:
+        topN = sorted(pid_scores, key=lambda x: x[1], reverse=True)[:TOP_N_PER_TOPIC]
+        for pid, score in topN:
             d = post_data.get(pid, {})
             f.write(json.dumps({
                 "post_id":       pid,
@@ -163,8 +202,8 @@ with open("candidate_pool_500.jsonl", "w") as f:
                 "engagement":    d.get("engagement", 0),
                 "lr_score":      round(score, 4),
             }, ensure_ascii=False) + "\n")
-        total += len(top500)
-        print(f"  {topic_name:<30} {len(top500)} posts")
+        total += len(topN)
+        print(f"  {topic_name:<30} {len(topN)} posts")
 
-print(f"\nTotal: {total} posts → candidate_pool_500.jsonl")
+print(f"\nTotal: {total} posts → candidate_pool_{TOP_N_PER_TOPIC}.jsonl")
 print(f"\nDone in {(time.time() - t0) / 60:.1f} minutes")
