@@ -5,7 +5,7 @@ Inputs:
   - all_labels.csv               (1,000 human labels)
   - embeddings.npy               (2.2M × 1024 BGE-M3 embeddings)
   - post_ids.npy                 (2.2M post IDs, row-aligned to embeddings)
-  - post_topics.jsonl            (2.2M posts → BERTopic cluster ID, from step2_local.py)
+  - post_topics.jsonl            (2.2M posts → BERTopic cluster ID, from ds2_cluster_topics.py)
   - candidate_posts_eng10.jsonl  (post texts)
 
 Outputs:

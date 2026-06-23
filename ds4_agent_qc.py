@@ -14,12 +14,12 @@ from anthropic import Anthropic
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import defaultdict
 
-INPUT_FILE      = "candidate_pool_500.jsonl"
-RANKINGS_FILE   = "rankings.jsonl"
-OUTPUT_FILE     = "2550_posts.jsonl"
-CHECKPOINT_FILE = "agent_qc_checkpoint.json"
+INPUT_FILE      = "candidate_pool_1000.jsonl"
+RANKINGS_FILE   = "rankings_8000.jsonl"
+OUTPUT_FILE     = "8000_posts.jsonl"
+CHECKPOINT_FILE = "agent_qc_8000_checkpoint.json"
 
-TOP_N       = 150
+TOP_N       = 470
 BATCH_SIZE  = 10
 MAX_WORKERS = 15
 

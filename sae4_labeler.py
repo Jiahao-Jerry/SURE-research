@@ -58,7 +58,7 @@ axis  = np.load(AXIS_FILE, allow_pickle=True).astype(str)
 dirs  = np.load(DIR_FILE,  allow_pickle=True).astype(str)
 pids  = np.load(ID_FILE,   allow_pickle=True).astype(str)
 
-# Same preprocessing as step3_train_sae.py
+# Same preprocessing as sae3_train.py
 diff[dirs == "down"] *= -1
 norms = np.linalg.norm(diff, axis=1, keepdims=True).clip(min=1e-8)
 diff  = diff / norms

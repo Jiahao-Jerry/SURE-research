@@ -146,7 +146,7 @@ print(f"  diff_vectors_{n}.npy  {diff_vectors.shape}")
 print(f"  axis_labels_{n}.npy")
 print(f"  directions_{n}.npy")
 print(f"  post_ids_{n}.npy")
-print(f"\nDownload these 4 files and run step3_train_sae.py locally.")
+print(f"\nDownload these 4 files and run sae3_train.py locally.")
 
 try:
     from google.colab import files

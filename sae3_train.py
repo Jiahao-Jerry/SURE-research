@@ -45,7 +45,7 @@ AXIS_SHORT = get_axis_short(cfg)
 # Auto-detect the file from Colab output
 diff_files = sorted(glob.glob("diff_vectors_*.npy"))
 if not diff_files:
-    raise FileNotFoundError("No diff_vectors_*.npy found. Run step2_colab_qwen_embed.py on Colab first.")
+    raise FileNotFoundError("No diff_vectors_*.npy found. Run sae2_embed_colab.py on Colab first.")
 
 diff_file = diff_files[-1]          # use latest
 n_str     = diff_file.split("_")[-1].replace(".npy", "")
