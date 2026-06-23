@@ -1,38 +1,63 @@
-# Large raw files (not tracked)
+# System
+.DS_Store
+__pycache__/
+*.pyc
+
+# Raw data (too large)
 candidate_posts_eng10.jsonl
 candidate_posts_eng10.jsonl.gz
-post_topics_gpu.jsonl
-post_topics.jsonl
 embeddings.npy
 post_ids.npy
-*.DS_Store
+post_topics.jsonl
+post_topics_gpu.jsonl
 
-# Intermediate / old files
+# Intermediate pipeline outputs (regenerable)
+probability_scores.jsonl
+candidate_pool_*.jsonl
+rankings.jsonl
+rankings_*.jsonl
+label_axes_checkpoint.json
+agent_qc_*_checkpoint.json
+agent_qc_checkpoint.json
+
+# SAE intermediate files
+sae_clean_rewrites.json
+diff_vectors_*.npy
+axis_labels_*.npy
+directions_*.npy
+post_ids_*.npy
+
+# Old / deprecated files
+100_posts.jsonl
+2550_posts_final.jsonl
+3k_dataset.jsonl
+master_dataset.jsonl
+make_3k_dataset.py
+select_100_posts.py
+two_tower_demo.py
+two_tower_model.pt
+step3_v2.py
+quality_model.pkl
+bertopic_model/
+bertopic_model_pickle
+topic_info.csv
+topic_info_gpu.csv
+topic_batches/
+progress_*.csv
+*.csv.gz
+
+# Misc old outputs
 30_preview_posts.jsonl
 400_preview_posts.jsonl
 500_posts_post_train.jsonl
 1700_posts_final.jsonl
-label_300_zh.csv
-label_300.csv
-labeler.html
-labeler_68.html
-labeler_v2_preview.html
-load_filtered_labeler.py
-load_final_labeler.py
-load_sample_labeler.py
+label_300*.csv
+labeled_300.csv
+labeler*.html
+load_*.py
 sample_preview.py
 preview_new2.py
 make_comparison_labeler.py
 comparison_labeler.html
-sports_comparison_100.csv
-climate_comparison_100.csv
-progress_40.csv
+*_comparison_100.csv
 step3_train_score.py
-topic_info.csv
-topic_info_gpu.csv
-topic_batches/
-bertopic_model_pickle
-labeled_300.csv
-
-# Misc
-*.csv.gz
